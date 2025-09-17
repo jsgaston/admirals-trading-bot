@@ -1,0 +1,118 @@
+# .github/workflows/data-collection.yml
+name: Data Collection
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Cada 6 horas
+  workflow_dispatch:
+
+jobs:
+  collect-data:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install pandas numpy requests google-auth google-api-python-client
+    
+    - name: Collect forex data
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        GOOGLE_DRIVE_FOLDER: ${{ secrets.GOOGLE_DRIVE_FOLDER }}
+      run: python scripts/data_collector.py
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: forex-data
+        path: data/
+        retention-days: 7
+
+---
+
+# .github/workflows/signal-generation.yml
+name: ML Signal Generation
+
+on:
+  schedule:
+    - cron: '30 */4 * * *'  # Cada 4 horas, 30 min después de data collection
+  workflow_dispatch:
+
+jobs:
+  generate-signals:
+    runs-on: ubuntu-latest
+    needs: []
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install ML dependencies
+      run: |
+        pip install pandas numpy scikit-learn tensorflow-cpu ta-lib requests
+        pip install google-auth google-api-python-client
+    
+    - name: Download data from Google Drive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        GOOGLE_DRIVE_FOLDER: ${{ secrets.GOOGLE_DRIVE_FOLDER }}
+      run: python scripts/google_drive_manager.py download
+    
+    - name: Generate ML signals
+      run: python scripts/ml_signal_generator.py
+    
+    - name: Send signals to MyFxBook
+      env:
+        MYFXBOOK_API_KEY: ${{ secrets.MYFXBOOK_API_KEY }}
+        MYFXBOOK_WEBHOOK_URL: ${{ secrets.MYFXBOOK_WEBHOOK_URL }}
+        MYFXBOOK_ACCOUNT_ID: ${{ secrets.MYFXBOOK_ACCOUNT_ID }}
+      run: python scripts/myfxbook_sender.py
+    
+    - name: Update Google Sheets
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+      run: python scripts/update_google_sheets.py
+
+---
+
+# .github/workflows/risk-management.yml
+name: Risk Management
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Cada 15 minutos
+  workflow_dispatch:
+
+jobs:
+  risk-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install pandas numpy requests google-auth google-api-python-client
+    
+    - name: Check risk levels
+      env:
+        MYFXBOOK_API_KEY: ${{ secrets.MYFXBOOK_API_KEY }}
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        MAX_DAILY_RISK: "5.0"
+        MAX_DRAWDOWN: "10.0"
+      run: python scripts/risk_manager.py
