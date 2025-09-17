@@ -1,0 +1,27 @@
+# requirements.txt
+# Core dependencies
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.1.0
+tensorflow-cpu>=2.10.0
+
+# Data and APIs
+requests>=2.28.0
+ta-lib>=0.4.25
+
+# Google services
+google-auth>=2.15.0
+google-auth-oauthlib>=0.7.1
+google-auth-httplib2>=0.1.0
+google-api-python-client>=2.70.0
+
+# Scheduling and utilities
+schedule>=1.2.0
+python-dotenv>=0.19.0
+
+# JSON and date handling
+python-dateutil>=2.8.2
+
+# Optional for enhanced features
+matplotlib>=3.6.0
+seaborn>=0.12.0
