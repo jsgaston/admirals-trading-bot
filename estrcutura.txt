@@ -1,0 +1,18 @@
+admirals-trading-bot/
+├── .github/workflows/
+│   ├── data-collection.yml
+│   ├── signal-generation.yml
+│   └── myfxbook-integration.yml
+├── scripts/
+│   ├── data_collector.py
+│   ├── ml_signal_generator.py
+│   ├── myfxbook_sender.py
+│   └── google_drive_manager.py
+├── models/
+│   └── trading_model.py
+├── config/
+│   ├── trading_config.py
+│   └── broker_config.py
+├── google_apps_script/
+│   └── Code.gs
+└── requirements.txt
