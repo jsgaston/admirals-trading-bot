@@ -1,0 +1,3 @@
+GitHub Actions → Genera señales ML → Google Drive → MyFxBook AutoTrade → Admirals Markets
+     ↓                                    ↓
+Google Sheets ← Logging/Monitoreo ← Google Apps Script
